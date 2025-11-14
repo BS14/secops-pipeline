@@ -37,7 +37,7 @@ jobs:
       # Run CodeQL to find vulnerabilities in the code itself.
       # This finds issues like SQL injection, XSS, etc.
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: 'python' # Specify the language to analyze
 
@@ -46,7 +46,7 @@ jobs:
       #   uses: github/codeql-action/autobuild@v3
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
 
       # --- 3. Secret Scanning ---
       # Run Gitleaks to find any hardcoded secrets.
@@ -58,7 +58,7 @@ jobs:
           report_path: $GITHUB_WORKSPACE/gitleaks-report.sarif
         env:
           # Disables GitHub's default token scanner to avoid duplicate results
-          GITHUB_TOKEN: ${{ secrets.DUMMY_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # --- 4. Dockerfile Linting ---
       # Run Hadolint to check the Dockerfile for best practices
