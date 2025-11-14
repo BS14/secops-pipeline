@@ -1,0 +1,87 @@
+# .github/workflows/pr-checks.yml
+#
+# This workflow runs on every Pull Request.
+# It performs static analysis, linting, and scanning on the source code
+# *before* any artifacts are built. This is the "shift left" security
+# in action, catching issues before they are merged.
+
+name: PR Security & Lint Checks
+
+on:
+  pull_request:
+    branches: [ "main" ] # Or your default branch
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  security-checks:
+    name: Security & Linting
+    runs-on: ubuntu-latest
+
+    # These permissions are needed for CodeQL to function.
+    # Gitleaks also uses the security-events to upload SARIF results.
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      # --- 1. Checkout Code ---
+      # Gitleaks needs the full history to scan for secrets,
+      # so we set fetch-depth: 0 (which means "all history").
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # --- 2. SAST (Static Application Security Testing) ---
+      # Run CodeQL to find vulnerabilities in the code itself.
+      # This finds issues like SQL injection, XSS, etc.
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: 'python' # Specify the language to analyze
+
+      # Add your project's build steps here if it's a compiled language (e.g., Go, Java)
+      # - name: Autobuild
+      #   uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+      # --- 3. Secret Scanning ---
+      # Run Gitleaks to find any hardcoded secrets.
+      - name: Run Gitleaks Secret Scanner
+        uses: gitleaks/gitleaks-action@v2.3.9
+        with:
+          # This uploads the results to GitHub's Security tab as a SARIF file
+          report_format: sarif
+          report_path: $GITHUB_WORKSPACE/gitleaks-report.sarif
+        env:
+          # Disables GitHub's default token scanner to avoid duplicate results
+          GITHUB_TOKEN: ${{ secrets.DUMMY_GITHUB_TOKEN }}
+
+      # --- 4. Dockerfile Linting ---
+      # Run Hadolint to check the Dockerfile for best practices
+      # and common security misconfigurations (e.g., running as root).
+      - name: Run Hadolint Dockerfile Linter
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: ./Dockerfile # Path to your Dockerfile
+
+      # --- 5. SCA (Software Composition Analysis) & IaC Scanning ---
+      # Run Trivy to scan the filesystem for:
+      # 1. Vulnerable dependencies (package.json, requirements.txt, etc.)
+      # 2. Infrastructure as Code (IaC) misconfigurations (Terraform, CloudFormation)
+      - name: Run Trivy for FS vulnerabilities and IaC misconfigurations
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.' # Scan the entire filesystem
+          exit-code: '1' # Fail the build if issues are found
+          format: 'table'
+          # Fail on HIGH or CRITICAL severity vulnerabilities
+          severity: 'HIGH,CRITICAL'
+          # Scan for both vulnerabilities (vuln) and IaC misconfigs (config)
+          scanners: 'vuln,config'
+          # Don't fail the build for vulnerabilities that don't have a fix yet
+          ignore-unfixed: true
