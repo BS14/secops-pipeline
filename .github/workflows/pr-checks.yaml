@@ -69,14 +69,14 @@ jobs:
         run: |
           docker build -t trivy-scan-image:pr-${{ github.sha }} .
 
-      - name: Run Trivy filesystem scan (SARIF)
+      - name: Run Trivy filesystem scan
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'image'
           image-ref: 'trivy-scan-image:pr-${{ github.sha }}'
           format: 'table'
           output: 'trivy-results.table'
-          exit-code: '0'
+          exit-code: '1'
           ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
       
