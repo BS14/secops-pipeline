@@ -81,11 +81,16 @@ jobs:
           severity: 'CRITICAL,HIGH'
       
       - name: Publish Trivy results to summary
+        if: always() # Always run this step to publish results
         run: |
-          echo "### Trivy Scan Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          cat trivy-results.table >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-        if: always()
-
+          if [[ -s trivy-results.txt ]]; then
+            {
+              echo "### Trivy Scan Results"
+              echo "<details><summary>Click to expand</summary>"
+              echo ""
+              echo '```'
+              cat trivy-results.txt
+              echo '```'
+              echo "</details>"
+            } >> $GITHUB_STEP_SUMMARY
+          fi
