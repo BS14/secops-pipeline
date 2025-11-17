@@ -75,7 +75,7 @@ jobs:
           scan-type: 'image'
           image-ref: 'trivy-scan-image:pr-${{ github.sha }}'
           format: 'table'
-          output: 'trivy-result.table'
+          output: 'trivy-results.table'
           exit-code: '0'
           ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
