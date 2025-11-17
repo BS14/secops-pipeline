@@ -74,7 +74,7 @@ jobs:
         with:
           scan-type: 'image'
           image-ref: 'trivy-scan-image:pr-${{ github.sha }}'
-          format: 'sarif'
+          format: 'table'
           output: 'trivy-image.sarif'
           exit-code: '0'
           ignore-unfixed: true
