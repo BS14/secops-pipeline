@@ -1,0 +1,10 @@
+# Install all production libraries
+-r requirements.txt
+
+# Add testing libraries
+pytest
+pytest-asyncio
+httpx
+
+# Add linters
+pylint

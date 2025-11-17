@@ -1,0 +1,28 @@
+# Ignore Git
+.git/
+.gitignore
+
+# Ignore GitHub Actions workflows
+.github/
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore virtual environments
+.venv/
+venv/
+env/
+
+# Ignore test files and dev requirements
+tests/
+.pytest_cache/
+requirements-dev.txt
+pytest.ini
+
+# Ignore local config and documentation
+.dockerignore
+docker-compose.yaml
+README.md
+LICENSE
