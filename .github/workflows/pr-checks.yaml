@@ -67,13 +67,13 @@ jobs:
       # -- 5. Building Docker image for trivy scan ---
       - name: Build Image for Scanning
         run: |
-          docker build -t ${{ github.repository }}:pr-${{ github.sha }} .
+          docker build -t trivy-scan-image:pr-${{ github.sha }} .
 
       - name: Run Trivy filesystem scan (SARIF)
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'image'
-          image-ref: '${{ github.repository }}:pr-${{ github.sha }}'
+          image-ref: 'trivy-scan-image:pr-${{ github.sha }}'
           format: 'sarif'
           output: 'trivy-image.sarif'
           exit-code: '0'
