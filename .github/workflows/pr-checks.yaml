@@ -76,6 +76,7 @@ jobs:
         with:
           sbom: true
           push: false
+          load: true
           tags: local-image-to-scan:pr-${{ github.sha }}
 
 
