@@ -1,6 +1,7 @@
 name: PR Security & Lint Checks
 
 on:
+  push:
   pull_request:
     branches: [ "main" ] 
   workflow_dispatch:
@@ -39,7 +40,24 @@ jobs:
       - name: Run Hadolint Dockerfile Linter
         uses: hadolint/hadolint-action@v3.3.0
         with:
-          dockerfile: ./Dockerfile # Path to your Dockerfile
+          dockerfile: ./Dockerfile # Path to your Dockerfile\
+      
+      - name: Set up Python
+        uses: actions/setup-python@6.0.0
+        with:
+          python-version: 3.14
+
+      - name: Install test and Lint
+        run: |
+          pip install -r requirements-dev.txt
+
+      - name: Run Pylint
+        run: |
+          pylint apps/
+
+      - name: Run pytest
+        run: |
+          pytest
 
       - name: Build Image for Scanning
         run: |
