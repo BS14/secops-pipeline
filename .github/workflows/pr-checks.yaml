@@ -75,8 +75,17 @@ jobs:
           scan-type: 'image'
           image-ref: 'trivy-scan-image:pr-${{ github.sha }}'
           format: 'table'
-          output: 'trivy-image.sarif'
+          output: 'trivy-result.table'
           exit-code: '0'
           ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
+      
+      - name: Publish Trivy results to summary
+        run: |
+          echo "### Trivy Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat trivy-results.table >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        if: always()
 
