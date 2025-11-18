@@ -138,7 +138,7 @@ jobs:
       - name: Publish ZAP Report to Summary
         if: always()
         run: |
-          if [[ -s report.md ]]; then
+          if [[ -s report_md.md ]]; then
             {
               echo "### OWASP ZAP Scan Results"
               echo "<details><summary>Click to expand</summary>"
