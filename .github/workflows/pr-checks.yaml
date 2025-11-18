@@ -66,13 +66,12 @@ jobs:
         run: |
           pytest
 
-  security-scans:
-    name: Container and DAST [Trivy/ZAP]
+  trivy-scans:
+    name: Trivy Scan
     runs-on: ubuntu-latest
     permissions:
       contents: read
       security-events: write
-      issues: write
     needs: [static-checks, python-tests, codeql-analysis]
     steps:
       - name: Checkout repository
@@ -107,9 +106,23 @@ jobs:
             } >> $GITHUB_STEP_SUMMARY
           fi\
 
+  owasp-scan:
+    name: OWASP-ZAP Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      issues: write
+    needs: [static-checks, python-tests, codeql-analysis]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Build Image for Scanning
+        run: |
+          docker build -t trivy-image:${{ github.sha }} .
       - name: Run App Container for OWASP ZAP
         run: |
-          docker run -d --name owasp-zap -p 8000:8000 scan-image:${{ github.sha }}
+          docker run -d --name owasp-zap -p 8000:8000 trivy-image:${{ github.sha }}
           echo "Waiting for app to be healthy..."
           curl --fail --retry 10 --retry-all-errors --retry-delay 3 http://localhost:8000/health 
       - name: OWASP ZAP Baseline Scan
