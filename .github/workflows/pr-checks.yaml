@@ -35,6 +35,9 @@ jobs:
       contents: read
       security-events: write
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
@@ -47,6 +50,8 @@ jobs:
     name: Python Test and Lint
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
@@ -68,7 +73,10 @@ jobs:
       contents: read
       security-events: write
       issues: write
+    needs: [static-checks, python-tests, codeql-analysis]
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - name: Build Image for Scanning
         run: |
           docker build -t scan-image:pr-${{ github.sha }} .
