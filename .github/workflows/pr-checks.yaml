@@ -143,9 +143,7 @@ jobs:
               echo "### OWASP ZAP Scan Results"
               echo "<details><summary>Click to expand</summary>"
               echo ""
-              echo '```'
               cat report_md.md
-              echo '```'
               echo "</details>"
             } >> $GITHUB_STEP_SUMMARY
           fi\
