@@ -7,15 +7,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  security-checks:
-    name: Security & Linting
+  static-checks:
+    name: static Checks [Gitleaks/Hadolint]
     runs-on: ubuntu-latest
-
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-
     steps:
       # Gitleaks needs the full history to scan for secrets,
       # so we set fetch-depth: 0 (which means "all history").
@@ -23,15 +17,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
-        with:
-          languages: 'python' # Specify the language to analyze
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
-
       - name: Run Gitleaks Secret Scanner
         uses: gitleaks/gitleaks-action@v2.3.9
         env:
@@ -41,33 +26,58 @@ jobs:
         uses: hadolint/hadolint-action@v3.3.0
         with:
           dockerfile: ./Dockerfile # Path to your Dockerfile\
-      
+  
+  codeql-analysis:
+    name: CodeQL SAST
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: 'python' # Specify the language to analyze
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+
+  python-tests:
+    name: Python Test and Lint
+    runs-on: ubuntu-latest
+    steps:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: 3.14
-
       - name: Install test and Lint
         run: |
           pip install -r requirements-dev.txt
-
       - name: Run Pylint
         run: |
           pylint apps/
-
       - name: Run pytest
         run: |
           pytest
 
+  security-scans:
+    name: Container and DAST [Trivy/ZAP]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      issues: write
+    steps:
       - name: Build Image for Scanning
         run: |
-          docker build -t trivy-scan-image:pr-${{ github.sha }} .
+          docker build -t scan-image:pr-${{ github.sha }} .
 
       - name: Run Trivy filesystem scan
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'image'
-          image-ref: 'trivy-scan-image:pr-${{ github.sha }}'
+          image-ref: 'scan-image:pr-${{ github.sha }}'
           format: 'table'
           output: 'trivy-results.table'
           exit-code: '1'
