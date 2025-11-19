@@ -1,7 +1,10 @@
 name: Docker Image to DockerHub
 on:
-  push:
+  workflow_run:
+    workflows: ["Security & Lint Checks"]
+    types: [completed]
     branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   create-and-sign:

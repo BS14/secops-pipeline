@@ -1,4 +1,4 @@
-name: PR Security & Lint Checks
+name: Security & Lint Checks
 
 on:
   push:
@@ -69,6 +69,7 @@ jobs:
   trivy-scans:
     name: Trivy Scan
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
     permissions:
       contents: read
       security-events: write
@@ -109,6 +110,7 @@ jobs:
   owasp-scan:
     name: OWASP-ZAP Scan
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
     permissions:
       contents: read
       security-events: write
