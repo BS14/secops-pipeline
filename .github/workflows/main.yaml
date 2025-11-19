@@ -36,5 +36,5 @@ jobs:
         run: |
           echo "Signing image with cosign..."
           cosign sign \
-            ${{ secrets.DOCKER_USERNAME }}/secops-pipeline:latest
+            ${{ secrets.DOCKER_USERNAME }}/fastapi:{{ github.sha }}
           echo "Image successfully pushed and signed."
