@@ -69,7 +69,7 @@ jobs:
   trivy-scans:
     name: Trivy Scan
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     permissions:
       contents: read
       security-events: write
@@ -110,7 +110,7 @@ jobs:
   owasp-scan:
     name: OWASP-ZAP Scan
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     permissions:
       contents: read
       security-events: write
